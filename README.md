@@ -1,72 +1,70 @@
 # 🎮 Minecraft Skin Generator (DCGAN)
 
 ## About
-Minecraft Skin Generator leverages a Deep Convolutional Generative Adversarial Network (DCGAN) to generate unique Minecraft skins. Trained on a curated dataset of player-created skins, this model produces coherent, pixel-art-style human or character skins ready for in-game use. The goal is to empower players and creators by providing an interactive, creative tool to generate, explore, and customize new skin designs.
 
-DCGANs are a class of GANs that replace fully connected layers with convolutional and transpose-convolutional layers—improving training stability and visual coherence :contentReference[oaicite:1]{index=1}. This project adapts that architecture to the 64×64 skin domain, generating high-quality textures with minimal artifacts.
+Minecraft Skin Generator is a deep learning project that uses a Deep Convolutional Generative Adversarial Network (DCGAN) to produce original Minecraft skins. Trained on a dataset of player-created skins, this tool generates coherent and stylized 64×64 pixel skins in classic Minecraft format. A Streamlit-based web app is included for interactive use and real-time skin generation.
+
+This project combines an end-to-end GAN pipeline (via `SkinGen.py`) and a web interface (via `Skinapp.py`) for creators, modders, and players who want to design custom skins or experiment with generative models.
 
 ## Features
-- **Generative skin creation**  
-  Produces full 64×64 Minecraft skins using learned latent representations.
 
-- **DCGAN architecture**  
-  Employs convolutional layers, batch normalization, dropout, and ReLU/LeakyReLU activations following DCGAN best practices :contentReference[oaicite:2]{index=2}.
+- **🎨 AI-Generated Skins**  
+  Generates full-body Minecraft skins (64×64) using a learned DCGAN model.
 
-- **Latent-space exploration**  
-  Interactive sampling allows users to adjust noise vectors to generate diverse or interpolated skin outputs.
+- **🧠 End-to-End Training Pipeline**  
+  `SkinGen.py` handles dataset loading, preprocessing, model definition, training, and skin generation—all in one script.
 
-- **Pretrained model**  
-  Comes with pretrained weights—ready to generate new skins instantly, or retrain on new datasets.
+- **📦 Pretrained Weights Included**  
+  `generator.h5` allows users to immediately generate skins without retraining.
 
-- **Modular pipeline**  
-  Includes scripts for data prep (`prepare_data.py`), training (`train.py`), generation (`generate.py`), and visualization of outputs across training epochs.
+- **🖼️ Visualization Support**  
+  Sample outputs (e.g., `epoch_050.png`) are saved during training to visualize model progress.
 
-- **Customization ready**  
-  Easily adapt learning rates, batch size, loss functions, or try alternative GAN variants like conditional GANs or StyleGAN extensions.
+- **🖥️ Streamlit Web App**  
+  `Skinapp.py` provides a browser interface to generate new skins in real time using the trained model.
 
-## Project overview
-A structured, end-to-end GAN pipeline:
+- **🧪 Customization Friendly**  
+  Modify architecture, batch size, learning rate, or replace DCGAN with other GAN variants easily within `SkinGen.py`.
 
-### 1. Data Preparation  
-- Input: Folder of raw `.png` skin images, resized/cropped to 64×64.  
-- `prepare_data.py` standardizes these images and packages them into a PyTorch `Dataset`.
+## File Overview
 
-### 2. Model Architecture  
-- **Generator**: Noise → series of transpose-convolution layers → 64×64×3 RGB skin.  
-- **Discriminator**: 64×64×3 input → Conv layers → scalar real/fake output.  
-- Uses batch norm in all layers (except generator output), ReLU in Generator, LeakyReLU in Discriminator :contentReference[oaicite:3]{index=3}.
-
-### 3. Training Process  
-- Implemented in `train.py` with alternating optimization of generator and discriminator using Adam optimizer.  
-- Includes checkpoint saving and optional image grid outputs at epochs for training monitoring.
-
-### 4. Skin Generation  
-- `generate.py` loads trained model, accepts latent vectors or random noise, outputs new skin PNGs.  
-- CLI options for batch size, seed setting, and output directories.
-
-### 5. Visualization & Interpolation  
-- Optionally visualize generated samples across epochs (e.g. 10 epochs, 20 epochs...).  
-- Support for linear interpolation between two noise vectors to morph between skin designs.
+| File             | Description                                              |
+|------------------|----------------------------------------------------------|
+| `SkinGen.py`     | Full DCGAN pipeline: data loading, training, generation  |
+| `Skinapp.py`     | Streamlit interface for real-time skin generation        |
+| `generator.h5`   | Pretrained generator model for inference                 |
+| `epoch_050.png`  | Example output at epoch 50                               |
+| `README.md`      | Project documentation                                    |
+| `LICENSE`        | Open-source license (MIT)                                |
 
 ---
 
+## Technologies Used
+
+- **Deep Learning**: Keras (TensorFlow backend), DCGAN  
+- **Data Processing**: Python, NumPy, PIL  
+- **Visualization**: Matplotlib  
+- **Frontend**: Streamlit (real-time web interface)  
+- **Model Storage**: HDF5 (`generator.h5`)
+
+## Future Improvements
+
+- Add style interpolation sliders to Streamlit UI  
+- Expand dataset diversity with fantasy or sci-fi themed skins  
+- Implement conditional GANs for labeled/class-specific generation  
+- Export `.mcpack` or `.zip` formats for direct Minecraft import  
+- Deploy as a hosted web app for public access
+
 ## Example Usage
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/neelmajmudar/MinecraftSkinGen.git
 cd MinecraftSkinGen
-python3 -m venv venv && source venv/bin/activate
+
 pip install -r requirements.txt
 
-# Prepare skin dataset
-python prepare_data.py --data_dir ./skins_raw --output data/skins.pt
+streamlit run Skinapp.py
+```
 
-# Train DCGAN model
-python train.py --data data/skins.pt --epochs 50 --batch_size 64 --lr 0.0002 --save_dir models/
-
-# Generate new skins
-mkdir -p output
-python generate.py --model models/dcgan_skin.pt --num 16 --output output/
-
-# Interpolate between two skins
-python generate.py --model models/dcgan_skin.pt --interpolate --steps 8 --output interp/
